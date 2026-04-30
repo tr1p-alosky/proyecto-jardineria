@@ -9,7 +9,6 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
 enum Estado_laboral {
@@ -104,5 +103,3 @@ progreso_proyecto   Int          @default(0)
 // Relación explícita
   responsable     Personal  @relation(fields: [id_empleado], references: [id_empleado])
 }
-
-
