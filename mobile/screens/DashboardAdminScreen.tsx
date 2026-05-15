@@ -5,8 +5,13 @@ import {
   ScrollView,
   Dimensions,
   Pressable,
+  Modal,
 } from 'react-native';
+import { useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../App';
 import LogoSGRH from '../assets/SGRH.svg';
 import BrightView from '../assets/brightview.svg';
 import Onboarding from '../assets/onboarding.svg';
@@ -17,8 +22,8 @@ import Nomina from '../assets/nomina.svg';
 import Asistencias from '../assets/asistencias.svg';
 
 const { width, height } = Dimensions.get('window');
-
 const ICON_SIZE = (width - 48 - 32) / 3;
+type Nav = NativeStackNavigationProp<RootStackParamList>;
 
 const vacantes = [
   {
@@ -29,12 +34,7 @@ const vacantes = [
     estado: 'Active',
     estadoColor: '#4CAF50',
     descripcion: 'Buscamos desarrollador frontend con experiencia en React, TypeScript y Next.js para unirse a nuestro equipo de desarrollo.',
-    requisitos: [
-      '3+ años de experiencia en React',
-      'Conosimiento de TypeScript',
-      'Experiencia con Next.js',
-      'Manejo de CSS frameworks',
-    ],
+    requisitos: ['3+ años de experiencia en React', 'Conosimiento de TypeScript', 'Experiencia con Next.js', 'Manejo de CSS frameworks'],
   },
   {
     titulo: 'Contador General',
@@ -44,12 +44,7 @@ const vacantes = [
     estado: 'Filed',
     estadoColor: '#F44336',
     descripcion: 'Responsable de la contabilidad general de la empresa, elaboración de estados financieros y cumplimiento fisca.',
-    requisitos: [
-      'Titulado en contaduría',
-      'Experiencia en SAP',
-      'Conocimiento de normas fiscales',
-      'Experiencia en auditoría',
-    ],
+    requisitos: ['Titulado en contaduría', 'Experiencia en SAP', 'Conocimiento de normas fiscales', 'Experiencia en auditoría'],
   },
   {
     titulo: 'PlaceHolder',
@@ -63,128 +58,110 @@ const vacantes = [
   },
 ];
 
-type Props = {
-  onLogout?: () => void;
-};
+export default function DashboardAdminScreen() {
+  const navigation = useNavigation<Nav>();
+  const [menuVisible, setMenuVisible] = useState(false);
 
-export default function DashboardAdminScreen({ onLogout }: Props) {
+  const gridItems = [
+    { label: 'Onboarding', Icon: Onboarding, screen: 'Onboarding' as keyof RootStackParamList },
+    { label: 'Offboarding', Icon: Offboarding, screen: 'Offboarding' as keyof RootStackParamList },
+    { label: 'Asistencias', Icon: Asistencias, screen: 'Asistencias' as keyof RootStackParamList },
+    { label: 'Nomina', Icon: Nomina, screen: 'Nomina' as keyof RootStackParamList },
+    { label: 'Reclutamiento', Icon: Reclutamiento, screen: 'Reclutamiento' as keyof RootStackParamList },
+    { label: 'Perfil', Icon: Perfil, screen: 'Perfil' as keyof RootStackParamList },
+  ];
+
   return (
-    <ScrollView style={styles.scroll} contentContainerStyle={styles.container}>
-      <StatusBar style="dark" />
+    <View style={{ flex: 1 }}>
+      <ScrollView style={styles.scroll} contentContainerStyle={styles.container}>
+        <StatusBar style="dark" />
 
-      {/* Header */}
-      <View style={styles.header}>
-        <LogoSGRH width={140} height={50} />
-      </View>
+        {/* Header como botón */}
+        <Pressable style={styles.header} onPress={() => setMenuVisible(true)}>
+          <LogoSGRH width={140} height={50} />
+        </Pressable>
 
-      {/* Título */}
-      <Text style={styles.title}>
-        {'Bienvenido a\nSGRH de\n'}
-        <Text style={styles.titleGreen}>{'BrightView\nLandscapes.'}</Text>
-      </Text>
-
-      {/* Card BrightView */}
-      <View style={styles.brightviewCard}>
-        <BrightView width={width - 80} height={60} />
-      </View>
-
-      {/* Grid de módulos */}
-      <View style={styles.grid}>
-        {[
-          { label: 'Onboarding', Icon: Onboarding },
-          { label: 'Offboarding', Icon: Offboarding },
-          { label: 'Asistencias', Icon: Asistencias },
-          { label: 'Nomina', Icon: Nomina },
-          { label: 'Reclutamiento', Icon: Reclutamiento },
-          { label: 'Perfil', Icon: Perfil },
-        ].map(({ label, Icon }) => (
-          <Pressable key={label} style={styles.gridItem}>
-            <View style={styles.gridIconBox}>
-              <Icon width={ICON_SIZE * 0.5} height={ICON_SIZE * 0.5} />
+        {/* Menú desplegable */}
+        <Modal
+          visible={menuVisible}
+          transparent
+          animationType="fade"
+          onRequestClose={() => setMenuVisible(false)}
+        >
+          <Pressable style={styles.modalOverlay} onPress={() => setMenuVisible(false)}>
+            <View style={styles.menuCard}>
+              <Pressable
+                style={styles.menuItem}
+                onPress={() => {
+                  setMenuVisible(false);
+                  navigation.navigate('IniciarSesion');
+                }}
+              >
+                <Text style={styles.menuItemText}> Cerrar sesión</Text>
+              </Pressable>
             </View>
-            <Text style={styles.gridLabel}>{label}</Text>
           </Pressable>
-        ))}
-      </View>
+        </Modal>
 
-      {/* Vacantes */}
-      <Text style={styles.vacantesTitle}>{'Vacantes\ndisponibles'}</Text>
+        {/* Título */}
+        <Text style={styles.title}>
+          {'Bienvenido a\nSGRH de\n'}
+          <Text style={styles.titleGreen}>{'BrightView\nLandscapes.'}</Text>
+        </Text>
 
-      {vacantes.map((v, i) => (
-        <View key={i} style={styles.vacanteCard}>
-          <Text style={styles.vacanteTitle}>{v.titulo}</Text>
-          <Text style={styles.vacanteArea}>{v.area}</Text>
-
-          <View style={styles.tagsRow}>
-            <View style={styles.tagDark}>
-              <Text style={styles.tagDarkText}>{v.modalidad}</Text>
-            </View>
-            <View style={styles.tagDark}>
-              <Text style={styles.tagDarkText}>{v.salario}</Text>
-            </View>
-            <View style={[styles.tagStatus, { backgroundColor: v.estadoColor }]}>
-              <Text style={styles.tagStatusText}>{v.estado}</Text>
-            </View>
-          </View>
-
-          <Text style={styles.vacanteDesc}>{v.descripcion}</Text>
-
-          {v.requisitos.length > 0 && (
-            <>
-              <Text style={styles.requisitosTitle}>Requisitos</Text>
-              {v.requisitos.map((r, j) => (
-                <Text key={j} style={styles.requisito}>• {r}</Text>
-              ))}
-            </>
-          )}
+        {/* Card BrightView */}
+        <View style={styles.brightviewCard}>
+          <BrightView width={width - 80} height={60} />
         </View>
-      ))}
 
-    </ScrollView>
+        {/* Grid de módulos */}
+        <View style={styles.grid}>
+          {gridItems.map(({ label, Icon, screen }) => (
+            <Pressable key={label} style={styles.gridItem} onPress={() => navigation.navigate(screen)}>
+              <View style={styles.gridIconBox}>
+                <Icon width={ICON_SIZE * 0.5} height={ICON_SIZE * 0.5} />
+              </View>
+              <Text style={styles.gridLabel}>{label}</Text>
+            </Pressable>
+          ))}
+        </View>
+
+        {/* Vacantes */}
+        <Text style={styles.vacantesTitle}>{'Vacantes\ndisponibles'}</Text>
+
+        {vacantes.map((v, i) => (
+          <View key={i} style={styles.vacanteCard}>
+            <Text style={styles.vacanteTitle}>{v.titulo}</Text>
+            <Text style={styles.vacanteArea}>{v.area}</Text>
+            <View style={styles.tagsRow}>
+              <View style={styles.tagDark}><Text style={styles.tagDarkText}>{v.modalidad}</Text></View>
+              <View style={styles.tagDark}><Text style={styles.tagDarkText}>{v.salario}</Text></View>
+              <View style={[styles.tagStatus, { backgroundColor: v.estadoColor }]}>
+                <Text style={styles.tagStatusText}>{v.estado}</Text>
+              </View>
+            </View>
+            <Text style={styles.vacanteDesc}>{v.descripcion}</Text>
+            {v.requisitos.length > 0 && (
+              <>
+                <Text style={styles.requisitosTitle}>Requisitos</Text>
+                {v.requisitos.map((r, j) => (
+                  <Text key={j} style={styles.requisito}>• {r}</Text>
+                ))}
+              </>
+            )}
+          </View>
+        ))}
+      </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  scroll: {
-    flex: 1,
-    backgroundColor: '#FFFFFF',
-  },
-  container: {
-    paddingHorizontal: 24,
-    paddingTop: 56,
-    paddingBottom: 40,
-  },
-  header: {
-    marginBottom: 20,
-  },
-  headerLogo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  asteriskSmall: {
-    width: 32,
-    height: 32,
-    backgroundColor: '#BCF0AE',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 4,
-  },
-  headerLogoText: {
-    fontSize: 16,
-    fontFamily: 'FunnelDisplay_700Bold',
-    color: '#111',
-  },
-  title: {
-    fontSize: 36,
-    fontFamily: 'FunnelDisplay_700Bold',
-    color: '#111',
-    lineHeight: 42,
-    marginBottom: 20,
-  },
-  titleGreen: {
-    color: '#BCF0AE',
-  },
+  scroll: { flex: 1, backgroundColor: '#FFFFFF' },
+  container: { paddingHorizontal: 24, paddingTop: 56, paddingBottom: 40 },
+  header: { marginBottom: 20 },
+  title: { fontSize: 36, fontFamily: 'FunnelDisplay_700Bold', color: '#111', lineHeight: 42, marginBottom: 20 },
+  titleGreen: { color: '#BCF0AE' },
   brightviewCard: {
     backgroundColor: '#FFFFFF',
     borderRadius: 16,
@@ -196,17 +173,8 @@ const styles = StyleSheet.create({
     shadowRadius: 12,
     elevation: 3,
   },
-  grid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 16,
-    marginBottom: 32,
-  },
-  gridItem: {
-    width: ICON_SIZE,
-    alignItems: 'center',
-    gap: 8,
-  },
+  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 16, marginBottom: 32 },
+  gridItem: { width: ICON_SIZE, alignItems: 'center', gap: 8 },
   gridIconBox: {
     width: ICON_SIZE,
     height: ICON_SIZE,
@@ -215,82 +183,44 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  gridLabel: {
-    fontSize: 13,
-    fontFamily: 'FunnelDisplay_400Regular',
-    color: '#111',
-    textAlign: 'center',
+  gridLabel: { fontSize: 13, fontFamily: 'FunnelDisplay_400Regular', color: '#111', textAlign: 'center' },
+  vacantesTitle: { fontSize: 40, fontFamily: 'FunnelDisplay_700Bold', color: '#111', lineHeight: 46, marginBottom: 20 },
+  vacanteCard: { backgroundColor: '#D6F5CC', borderRadius: 16, padding: 18, marginBottom: 16 },
+  vacanteTitle: { fontSize: 15, fontFamily: 'FunnelDisplay_700Bold', color: '#111', marginBottom: 2 },
+  vacanteArea: { fontSize: 13, fontFamily: 'FunnelDisplay_400Regular', color: '#555', marginBottom: 10 },
+  tagsRow: { flexDirection: 'row', gap: 6, marginBottom: 12, flexWrap: 'wrap' },
+  tagDark: { backgroundColor: '#111', borderRadius: 20, paddingVertical: 4, paddingHorizontal: 10 },
+  tagDarkText: { fontSize: 12, fontFamily: 'FunnelDisplay_400Regular', color: '#FFF' },
+  tagStatus: { borderRadius: 20, paddingVertical: 4, paddingHorizontal: 10 },
+  tagStatusText: { fontSize: 12, fontFamily: 'FunnelDisplay_700Bold', color: '#FFF' },
+  vacanteDesc: { fontSize: 13, fontFamily: 'FunnelDisplay_400Regular', color: '#333', lineHeight: 18, marginBottom: 10 },
+  requisitosTitle: { fontSize: 13, fontFamily: 'FunnelDisplay_400Regular', color: '#333', marginBottom: 4 },
+  requisito: { fontSize: 13, fontFamily: 'FunnelDisplay_400Regular', color: '#333', lineHeight: 20, paddingLeft: 4 },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.3)',
+    justifyContent: 'flex-start',
+    alignItems: 'flex-start',
+    paddingTop: 100,
+    paddingLeft: 24,
   },
-  vacantesTitle: {
-    fontSize: 40,
-    fontFamily: 'FunnelDisplay_700Bold',
-    color: '#111',
-    lineHeight: 46,
-    marginBottom: 20,
+  menuCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    paddingVertical: 8,
+    minWidth: 180,
+    shadowColor: '#000',
+    shadowOpacity: 0.12,
+    shadowRadius: 10,
+    elevation: 5,
   },
-  vacanteCard: {
-    backgroundColor: '#D6F5CC',
-    borderRadius: 16,
-    padding: 18,
-    marginBottom: 16,
+  menuItem: {
+    paddingVertical: 14,
+    paddingHorizontal: 20,
   },
-  vacanteTitle: {
+  menuItemText: {
     fontSize: 15,
-    fontFamily: 'FunnelDisplay_700Bold',
+    fontFamily: 'FunnelDisplay_400Regular',
     color: '#111',
-    marginBottom: 2,
-  },
-  vacanteArea: {
-    fontSize: 13,
-    fontFamily: 'FunnelDisplay_400Regular',
-    color: '#555',
-    marginBottom: 10,
-  },
-  tagsRow: {
-    flexDirection: 'row',
-    gap: 6,
-    marginBottom: 12,
-    flexWrap: 'wrap',
-  },
-  tagDark: {
-    backgroundColor: '#111',
-    borderRadius: 20,
-    paddingVertical: 4,
-    paddingHorizontal: 10,
-  },
-  tagDarkText: {
-    fontSize: 12,
-    fontFamily: 'FunnelDisplay_400Regular',
-    color: '#FFF',
-  },
-  tagStatus: {
-    borderRadius: 20,
-    paddingVertical: 4,
-    paddingHorizontal: 10,
-  },
-  tagStatusText: {
-    fontSize: 12,
-    fontFamily: 'FunnelDisplay_700Bold',
-    color: '#FFF',
-  },
-  vacanteDesc: {
-    fontSize: 13,
-    fontFamily: 'FunnelDisplay_400Regular',
-    color: '#333',
-    lineHeight: 18,
-    marginBottom: 10,
-  },
-  requisitosTitle: {
-    fontSize: 13,
-    fontFamily: 'FunnelDisplay_400Regular',
-    color: '#333',
-    marginBottom: 4,
-  },
-  requisito: {
-    fontSize: 13,
-    fontFamily: 'FunnelDisplay_400Regular',
-    color: '#333',
-    lineHeight: 20,
-    paddingLeft: 4,
   },
 });

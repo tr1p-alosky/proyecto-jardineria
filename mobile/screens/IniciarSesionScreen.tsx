@@ -8,34 +8,32 @@ import {
 } from 'react-native';
 import { useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import Asterisk from '../assets/file.svg';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../App';
+import Asterisk from '../assets/SGRH.svg';
 
 const { width, height } = Dimensions.get('window');
+type Nav = NativeStackNavigationProp<RootStackParamList>;
 
-type Props = {
-  onRegister: () => void;
-  onLogin?: () => void;
-};
-
-export default function IniciarSesionScreen({ onRegister, onLogin }: Props) {
+export default function IniciarSesionScreen() {
+  const navigation = useNavigation<Nav>();
   const [keepSession, setKeepSession] = useState(false);
 
   return (
     <View style={styles.container}>
       <StatusBar style="dark" />
 
-      {/* Logo */}
       <View style={styles.logoContainer}>
         <View style={styles.logoRow}>
-         
-            <Asterisk width={200} height={200} />
+          
+            <Asterisk width={220} height={220} />
           
           
         </View>
         <Text style={styles.logoSubtitle}>Acceso corporativo</Text>
       </View>
 
-      {/* Formulario */}
       <View style={styles.formContainer}>
         <Text style={styles.label}>Email corporativo</Text>
         <TextInput
@@ -57,22 +55,20 @@ export default function IniciarSesionScreen({ onRegister, onLogin }: Props) {
           secureTextEntry
         />
 
-        {/* Checkbox */}
         <Pressable style={styles.checkboxRow} onPress={() => setKeepSession(!keepSession)}>
           <View style={[styles.checkbox, keepSession && styles.checkboxChecked]} />
           <Text style={styles.checkboxText}>Mantener sesión iniciada</Text>
         </Pressable>
       </View>
 
-      {/* Botón ingresar */}
       <View style={styles.bottomContainer}>
-        <Pressable style={styles.loginButton} onPress={onLogin}>
+        <Pressable style={styles.loginButton} onPress={() => navigation.navigate('DashboardAdmin')}>
           <Text style={styles.loginButtonText}>Ingresar</Text>
         </Pressable>
 
         <Text style={styles.registerText}>
           No tienes una cuenta?{' '}
-          <Text style={styles.registerLink} onPress={onRegister}>
+          <Text style={styles.registerLink} onPress={() => navigation.navigate('RegAdmin')}>
             Regístrate aquí
           </Text>
         </Text>

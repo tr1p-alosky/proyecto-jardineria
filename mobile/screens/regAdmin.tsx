@@ -9,28 +9,26 @@ import {
 } from 'react-native';
 import { useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../App';
 import LogoSGRH from '../assets/SGRH.svg';
 
 const { width, height } = Dimensions.get('window');
+type Nav = NativeStackNavigationProp<RootStackParamList>;
 
-type Props = {
-  onBack: () => void;
-  onLogin: () => void;
-};
-
-export default function RegAdminScreen({ onBack, onLogin }: Props) {
+export default function RegAdminScreen() {
+  const navigation = useNavigation<Nav>();
   const [accepted, setAccepted] = useState(false);
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <StatusBar style="dark" />
 
-      {/* Header logo */}
       <View style={styles.header}>
         <LogoSGRH width={140} height={50} />
       </View>
 
-      {/* Título */}
       <Text style={styles.title}>
         {'Bienvenido\nal '}
         <Text style={styles.titleGreen}>equipo.</Text>
@@ -40,7 +38,6 @@ export default function RegAdminScreen({ onBack, onLogin }: Props) {
         Comencemos su viaje profesional. Configure sus credenciales de acceso para conectarse con el sistema de lorem ipsum dolor.
       </Text>
 
-      {/* Formulario */}
       <View style={styles.formCard}>
         <Text style={styles.label}>Nombre completo</Text>
         <TextInput style={styles.input} placeholder="Ej. Natanael Cano" placeholderTextColor="#aaa" />
@@ -57,7 +54,6 @@ export default function RegAdminScreen({ onBack, onLogin }: Props) {
         <Text style={styles.label}>Ingresa tu contraseña</Text>
         <TextInput style={styles.input} placeholder="12345" placeholderTextColor="#aaa" secureTextEntry />
 
-        {/* Checkbox términos */}
         <Pressable style={styles.checkboxRow} onPress={() => setAccepted(!accepted)}>
           <View style={[styles.checkbox, accepted && styles.checkboxChecked]} />
           <Text style={styles.checkboxText}>
@@ -66,14 +62,15 @@ export default function RegAdminScreen({ onBack, onLogin }: Props) {
           </Text>
         </Pressable>
 
-        {/* Botón registrar */}
         <Pressable style={styles.registerButton}>
           <Text style={styles.registerButtonText}>Registrarme</Text>
         </Pressable>
 
-        {/* Login link */}
         <Text style={styles.loginText}>
-          Ya tienes una cuenta? <Text style={styles.loginLink} onPress={onLogin}>Inicia sesión aquí</Text>
+          Ya tienes una cuenta?{' '}
+          <Text style={styles.loginLink} onPress={() => navigation.navigate('IniciarSesion')}>
+            Inicia sesión aquí
+          </Text>
         </Text>
       </View>
     </ScrollView>
@@ -92,20 +89,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 24,
     gap: 12,
-  },
-  logoBox: {
-    width: 48,
-    height: 48,
-    backgroundColor: '#BCF0AE',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 4,
-  },
-  logoText: {
-    fontSize: 18,
-    fontFamily: 'FunnelDisplay_700Bold',
-    color: '#BCF0AE',
-    lineHeight: 22,
   },
   title: {
     fontSize: 42,
