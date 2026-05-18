@@ -15,7 +15,7 @@ import BrightView from '../assets/brightview.svg';
 
 const { width, height } = Dimensions.get('window');
 type Nav = NativeStackNavigationProp<RootStackParamList>;
-type Route = RouteProp<RootStackParamList, 'DetalleOffboarding'>;
+type Route = RouteProp<RootStackParamList, 'DetalleOffboardingScreen'>;
 
 export default function DetalleOffboardingScreen() {
   const navigation = useNavigation<Nav>();

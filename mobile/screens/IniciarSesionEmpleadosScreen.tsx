@@ -18,7 +18,7 @@ type Nav = NativeStackNavigationProp<RootStackParamList>;
 
 export default function IniciarSesionScreen() {
   const navigation = useNavigation<Nav>();
-  const [rol, setRol] = useState<'admin' | 'empleado'>('admin');
+  
   const [keepSession, setKeepSession] = useState(false);
 
   return (
@@ -64,7 +64,7 @@ export default function IniciarSesionScreen() {
       <View style={styles.bottomContainer}>
         <Pressable
           style={styles.loginButton}
-          onPress={() => navigation.navigate('DashboardAdmin')}
+          onPress={() => navigation.navigate('DashboardEmpleado')}
         >
           <Text style={styles.loginButtonText}>Ingresar</Text>
         </Pressable>
@@ -73,7 +73,7 @@ export default function IniciarSesionScreen() {
           No tienes una cuenta?{' '}
           <Text
             style={styles.registerLink}
-            onPress={() => navigation.navigate('RegAdmin')}
+            onPress={() => navigation.navigate('RegEmpleado')}
           >
             Regístrate aquí
           </Text>

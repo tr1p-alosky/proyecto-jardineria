@@ -14,12 +14,11 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../App';
 import LogoSGRH from '../assets/SGRH.svg';
 import BrightView from '../assets/brightview.svg';
-import Onboarding from '../assets/onboarding.svg';
-import Offboarding from '../assets/offboarding.svg';
-import Reclutamiento from '../assets/reclutamiento.svg';
-import Perfil from '../assets/perfil.svg';
-import Nomina from '../assets/nomina.svg';
-import Asistencias from '../assets/asistencias.svg';
+import AsistenciasIcon from '../assets/asistencias.svg';
+import NominaIcon from '../assets/nomina.svg';
+import PerfilIcon from '../assets/perfil.svg';
+import ReclutamientoIcon from '../assets/reclutamiento.svg';
+import OnboardingIcon from '../assets/onboarding.svg';
 
 const { width, height } = Dimensions.get('window');
 const ICON_SIZE = (width - 48 - 32) / 3;
@@ -34,7 +33,6 @@ const vacantes = [
     estado: 'Active',
     estadoColor: '#4CAF50',
     descripcion: 'Buscamos desarrollador frontend con experiencia en React, TypeScript y Next.js para unirse a nuestro equipo de desarrollo.',
-    requisitos: ['3+ años de experiencia en React', 'Conosimiento de TypeScript', 'Experiencia con Next.js', 'Manejo de CSS frameworks'],
   },
   {
     titulo: 'Contador General',
@@ -43,32 +41,20 @@ const vacantes = [
     salario: '$22,000 - $32,000',
     estado: 'Filed',
     estadoColor: '#F44336',
-    descripcion: 'Responsable de la contabilidad general de la empresa, elaboración de estados financieros y cumplimiento fisca.',
-    requisitos: ['Titulado en contaduría', 'Experiencia en SAP', 'Conocimiento de normas fiscales', 'Experiencia en auditoría'],
-  },
-  {
-    titulo: 'PlaceHolder',
-    area: 'Tecnología',
-    modalidad: 'Remoto',
-    salario: '$25,000 - $35,000',
-    estado: 'Active',
-    estadoColor: '#4CAF50',
-    descripcion: 'Lorem ipsum dolor sit amet',
-    requisitos: [],
+    descripcion: 'Responsable de la contabilidad general de la empresa.',
   },
 ];
 
-export default function DashboardAdminScreen() {
+export default function DashboardEmpleadoScreen() {
   const navigation = useNavigation<Nav>();
   const [menuVisible, setMenuVisible] = useState(false);
 
   const gridItems = [
-    { label: 'Onboarding', Icon: Onboarding, screen: 'Onboarding' as keyof RootStackParamList },
-    { label: 'Offboarding', Icon: Offboarding, screen: 'Offboarding' as keyof RootStackParamList },
-    { label: 'Asistencias', Icon: Asistencias, screen: 'Asistencias' as keyof RootStackParamList },
-    { label: 'Nomina', Icon: Nomina, screen: 'Nomina' as keyof RootStackParamList },
-    { label: 'Reclutamiento', Icon: Reclutamiento, screen: 'Reclutamiento' as keyof RootStackParamList },
-    { label: 'Perfil', Icon: Perfil, screen: 'Perfil' as keyof RootStackParamList },
+    { label: 'Asistencias', Icon: AsistenciasIcon, screen: 'AsistenciaEmpleadoScreen' as keyof RootStackParamList },
+    { label: 'Nomina', Icon: NominaIcon, screen: 'NominaEmpleadoScreen' as keyof RootStackParamList },
+    { label: 'Certificados', Icon: OnboardingIcon, screen: 'Perfil' as keyof RootStackParamList },
+    { label: 'Procesos', Icon: ReclutamientoIcon, screen: 'Reclutamiento' as keyof RootStackParamList },
+    { label: 'Perfil', Icon: PerfilIcon, screen: 'Perfil' as keyof RootStackParamList },
   ];
 
   return (
@@ -76,32 +62,32 @@ export default function DashboardAdminScreen() {
       <ScrollView style={styles.scroll} contentContainerStyle={styles.container}>
         <StatusBar style="dark" />
 
-        {/* Header como botón */}
+        {/* Header */}
         <Pressable style={styles.header} onPress={() => setMenuVisible(true)}>
           <LogoSGRH width={140} height={50} />
         </Pressable>
 
-        {/* Menú desplegable */}
+        {/* Menú cerrar sesión */}
         <Modal
-          visible={menuVisible}
-          transparent
-          animationType="fade"
-          onRequestClose={() => setMenuVisible(false)}
-        >
-          <Pressable style={styles.modalOverlay} onPress={() => setMenuVisible(false)}>
-            <View style={styles.menuCard}>
-              <Pressable
-                style={styles.menuItem}
-                onPress={() => {
-                  setMenuVisible(false);
-                  navigation.reset({ index: 0, routes: [{ name: 'IniciarSesion' }] });
-                }}
-              >
-                <Text style={styles.menuItemText}> Cerrar sesión</Text>
-              </Pressable>
-            </View>
-          </Pressable>
-        </Modal>
+                  visible={menuVisible}
+                  transparent
+                  animationType="fade"
+                  onRequestClose={() => setMenuVisible(false)}
+                >
+                  <Pressable style={styles.modalOverlay} onPress={() => setMenuVisible(false)}>
+                    <View style={styles.menuCard}>
+                      <Pressable
+                        style={styles.menuItem}
+                        onPress={() => {
+                          setMenuVisible(false);
+                          navigation.reset({ index: 0, routes: [{ name: 'IniciarSesion' }] });
+                        }}
+                      >
+                        <Text style={styles.menuItemText}> Cerrar sesión</Text>
+                      </Pressable>
+                    </View>
+                  </Pressable>
+                </Modal>
 
         {/* Título */}
         <Text style={styles.title}>
@@ -140,15 +126,15 @@ export default function DashboardAdminScreen() {
                 <Text style={styles.tagStatusText}>{v.estado}</Text>
               </View>
             </View>
+            <View style={styles.vacanteButtons}>
+              <Pressable style={styles.solicitarBtn}>
+                <Text style={styles.solicitarBtnText}>Solicitar</Text>
+              </Pressable>
+              <Pressable style={styles.guardarBtn}>
+                <Text style={styles.guardarBtnText}>Guardar</Text>
+              </Pressable>
+            </View>
             <Text style={styles.vacanteDesc}>{v.descripcion}</Text>
-            {v.requisitos.length > 0 && (
-              <>
-                <Text style={styles.requisitosTitle}>Requisitos</Text>
-                {v.requisitos.map((r, j) => (
-                  <Text key={j} style={styles.requisito}>• {r}</Text>
-                ))}
-              </>
-            )}
           </View>
         ))}
       </ScrollView>
@@ -160,29 +146,15 @@ const styles = StyleSheet.create({
   scroll: { flex: 1, backgroundColor: '#FFFFFF' },
   container: { paddingHorizontal: 24, paddingTop: 56, paddingBottom: 40 },
   header: { marginBottom: 20 },
+  headerLogo: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  asteriskSmall: { width: 32, height: 32, backgroundColor: '#BCF0AE', alignItems: 'center', justifyContent: 'center', borderRadius: 4 },
+  headerLogoText: { fontSize: 16, fontFamily: 'FunnelDisplay_700Bold', color: '#111' },
   title: { fontSize: 36, fontFamily: 'FunnelDisplay_700Bold', color: '#111', lineHeight: 42, marginBottom: 20 },
   titleGreen: { color: '#BCF0AE' },
-  brightviewCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 28,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOpacity: 0.08,
-    shadowRadius: 12,
-    elevation: 3,
-  },
+  brightviewCard: { backgroundColor: '#FFFFFF', borderRadius: 16, padding: 20, marginBottom: 28, alignItems: 'center', shadowColor: '#000', shadowOpacity: 0.08, shadowRadius: 12, elevation: 3 },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 16, marginBottom: 32 },
   gridItem: { width: ICON_SIZE, alignItems: 'center', gap: 8 },
-  gridIconBox: {
-    width: ICON_SIZE,
-    height: ICON_SIZE,
-    backgroundColor: '#BCF0AE',
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
+  gridIconBox: { width: ICON_SIZE, height: ICON_SIZE, backgroundColor: '#BCF0AE', borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
   gridLabel: { fontSize: 13, fontFamily: 'FunnelDisplay_400Regular', color: '#111', textAlign: 'center' },
   vacantesTitle: { fontSize: 40, fontFamily: 'FunnelDisplay_700Bold', color: '#111', lineHeight: 46, marginBottom: 20 },
   vacanteCard: { backgroundColor: '#D6F5CC', borderRadius: 16, padding: 18, marginBottom: 16 },
@@ -193,34 +165,14 @@ const styles = StyleSheet.create({
   tagDarkText: { fontSize: 12, fontFamily: 'FunnelDisplay_400Regular', color: '#FFF' },
   tagStatus: { borderRadius: 20, paddingVertical: 4, paddingHorizontal: 10 },
   tagStatusText: { fontSize: 12, fontFamily: 'FunnelDisplay_700Bold', color: '#FFF' },
-  vacanteDesc: { fontSize: 13, fontFamily: 'FunnelDisplay_400Regular', color: '#333', lineHeight: 18, marginBottom: 10 },
-  requisitosTitle: { fontSize: 13, fontFamily: 'FunnelDisplay_400Regular', color: '#333', marginBottom: 4 },
-  requisito: { fontSize: 13, fontFamily: 'FunnelDisplay_400Regular', color: '#333', lineHeight: 20, paddingLeft: 4 },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.3)',
-    justifyContent: 'flex-start',
-    alignItems: 'flex-start',
-    paddingTop: 100,
-    paddingLeft: 24,
-  },
-  menuCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    paddingVertical: 8,
-    minWidth: 180,
-    shadowColor: '#000',
-    shadowOpacity: 0.12,
-    shadowRadius: 10,
-    elevation: 5,
-  },
-  menuItem: {
-    paddingVertical: 14,
-    paddingHorizontal: 20,
-  },
-  menuItemText: {
-    fontSize: 15,
-    fontFamily: 'FunnelDisplay_400Regular',
-    color: '#111',
-  },
+  vacanteButtons: { flexDirection: 'row', gap: 10, marginBottom: 12 },
+  solicitarBtn: { backgroundColor: '#BCF0AE', borderRadius: 20, paddingVertical: 6, paddingHorizontal: 16 },
+  solicitarBtnText: { fontSize: 13, fontFamily: 'FunnelDisplay_400Regular', color: '#111' },
+  guardarBtn: { borderWidth: 1.5, borderColor: '#111', borderRadius: 20, paddingVertical: 6, paddingHorizontal: 16, backgroundColor: '#FFF' },
+  guardarBtnText: { fontSize: 13, fontFamily: 'FunnelDisplay_400Regular', color: '#111' },
+  vacanteDesc: { fontSize: 13, fontFamily: 'FunnelDisplay_400Regular', color: '#333', lineHeight: 18 },
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.3)', justifyContent: 'flex-start', alignItems: 'flex-start', paddingTop: 100, paddingLeft: 24 },
+  menuCard: { backgroundColor: '#FFFFFF', borderRadius: 12, paddingVertical: 8, minWidth: 180, shadowColor: '#000', shadowOpacity: 0.12, shadowRadius: 10, elevation: 5 },
+  menuItem: { paddingVertical: 14, paddingHorizontal: 20 },
+  menuItemText: { fontSize: 15, fontFamily: 'FunnelDisplay_400Regular', color: '#111' },
 });
