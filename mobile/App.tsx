@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { StyleSheet, Text, View, Dimensions, Pressable } from 'react-native';
+import { StyleSheet, Text, View, Dimensions, Pressable, ActivityIndicator } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -35,6 +35,8 @@ import PerfilEmpleadoScreen from './screens/PerfilEmpleadoScreen';
 import ContratoScreen from './screens/ContratoScreen';
 import CertificadosScreen from './screens/CertificadosScreen';
 import AsistenciaEmpleadoScreen from './screens/AsistenciaEmpleadoScreen';
+
+import { AuthProvider, useAuth } from './contexts/AuthContext';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -113,10 +115,10 @@ function HomeScreen({ navigation }: any) {
         <ImgHome width={211} height={210} />
       </View>
       <View style={styles.buttonsContainer}>
-        <Pressable style={styles.button} onPress={() => navigation.navigate('RegAdmin')}>
+        <Pressable style={styles.button} onPress={() => navigation.navigate('IniciarSesion')}>
           <Text style={[styles.buttonText, { color: '#FFFF' }]}>Soy administrador</Text>
         </Pressable>
-        <Pressable style={[styles.button, { backgroundColor: '#FFFF', borderWidth: 3, borderColor: '#BCF0AE' }]} onPress ={() => navigation.navigate('RegEmpleado')}>
+        <Pressable style={[styles.button, { backgroundColor: '#FFFF', borderWidth: 3, borderColor: '#BCF0AE' }]} onPress ={() => navigation.navigate('IniciarSesionEmpleadosScreen')}>
           <Text style={[styles.buttonText, { color: '#BCF0AE' }]}>Soy empleado</Text>
         </Pressable>
       </View>
@@ -124,6 +126,73 @@ function HomeScreen({ navigation }: any) {
         Si tienes problemas con la aplicacion por favor envia un correo a lorem@ipsum.com
       </Text>
     </View>
+  );
+}
+
+// RootNavigator con lógica de autenticación
+function RootNavigator() {
+  const { isAuthenticated, loading, user } = useAuth();
+
+  if (loading) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#FFF' }}>
+        <ActivityIndicator size="large" color="#BCF0AE" />
+      </View>
+    );
+  }
+
+  return (
+    <Stack.Navigator
+      initialRouteName={isAuthenticated ? (user?.role === 'admin' ? 'DashboardAdmin' : 'DashboardEmpleadoScreen') : 'Home'}
+      screenOptions={{ headerShown: false, gestureEnabled: true, gestureDirection: 'horizontal', animation: 'slide_from_right' }}
+    >
+      {!isAuthenticated ? (
+        // Pantallas sin autenticar
+        <>
+          <Stack.Screen name="Splash" component={SplashScreenView} />
+          <Stack.Screen name="Home" component={HomeScreen} />
+          <Stack.Screen name="RegAdmin" component={RegAdminScreen} />
+          <Stack.Screen name="IniciarSesion" component={IniciarSesionScreen} />
+          <Stack.Screen name="IniciarSesionEmpleadosScreen" component={IniciarSesionEmpleadosScreen} />
+          <Stack.Screen name="RegEmpleado" component={RegEmpleadoScreen} />
+        </>
+      ) : (
+        // Pantallas autenticadas
+        <>
+          {user?.role === 'admin' ? (
+            // Pantallas para admin
+            <>
+              <Stack.Screen name="DashboardAdmin" component={DashboardAdminScreen} />
+              <Stack.Screen name="Onboarding" component={OnboardingScreen} />
+              <Stack.Screen name="Offboarding" component={OffboardingScreen} />
+              <Stack.Screen name="AsistenciasScreen" component={AsistenciasScreen} />
+              <Stack.Screen name="Nomina" component={NominaScreen} />
+              <Stack.Screen name="Reclutamiento" component={ReclutamientoScreen} />
+              <Stack.Screen name="Perfil" component={PerfilScreen} />
+              <Stack.Screen name="DetalleOffboardingScreen" component={DetalleOffboardingScreen} />
+              <Stack.Screen name="AddEmpleadoScreen" component={AddEmpleadoScreen} />
+              <Stack.Screen name="DetalleEmpleadoScreen" component={DetalleEmpleadoScreen} />
+              <Stack.Screen name="AsistenciaDetalleScreen" component={AsistenciaDetalleScreen} />
+              <Stack.Screen name="AsistenciaCalendarioScreen" component={AsistenciaCalendarioScreen} />
+              <Stack.Screen name="DetalleCandidatoScreen" component={DetalleCandidatoScreen} />
+              <Stack.Screen name="NominaDetalleScren" component={NominaDetalleScren} />
+            </>
+          ) : (
+            // Pantallas para empleado
+            <>
+              <Stack.Screen name="DashboardEmpleadoScreen" component={DashboardEmpleadoScreen} />
+              <Stack.Screen name="AsistenciaEmpleadoScreen" component={AsistenciaEmpleadoScreen} />
+              <Stack.Screen name="NominaEmpleadoScreen" component={NominaEmpleadoScreen} />
+              <Stack.Screen name="NominaEmpleadoDetalleScreen" component={NominaEmpleadoDetalleScreen} />
+              <Stack.Screen name="PerfilEmpleadoScreen" component={PerfilEmpleadoScreen} />
+              <Stack.Screen name="NotificacionesScreen" component={NotificacionesScreen} />
+              <Stack.Screen name="CertificadosScreen" component={CertificadosScreen} />
+              <Stack.Screen name="ContratoScreen" component={ContratoScreen} />
+            </>
+          )}
+        </>
+      )}
+    </Stack.Navigator>
   );
 }
 
@@ -142,38 +211,11 @@ export default function App() {
   if (!fontsLoaded) return null;
 
   return (
-    <NavigationContainer>
-      <Stack.Navigator screenOptions={{ headerShown: false, gestureEnabled: true, gestureDirection: 'horizontal', animation: 'slide_from_right' }}>
-        <Stack.Screen name="Splash" component={SplashScreenView} />
-        <Stack.Screen name="Home" component={HomeScreen} />
-        <Stack.Screen name="RegAdmin" component={RegAdminScreen} />
-        <Stack.Screen name="IniciarSesion" component={IniciarSesionScreen} />
-        <Stack.Screen name="IniciarSesionEmpleadosScreen" component={IniciarSesionEmpleadosScreen} />
-        <Stack.Screen name="DashboardAdmin" component={DashboardAdminScreen} />
-        <Stack.Screen name="Onboarding" component={OnboardingScreen} />
-        <Stack.Screen name="Offboarding" component={OffboardingScreen} />
-        <Stack.Screen name="AsistenciasScreen" component={AsistenciasScreen} />
-        <Stack.Screen name="Nomina" component={NominaScreen} />
-        <Stack.Screen name="Reclutamiento" component={ReclutamientoScreen} />
-        <Stack.Screen name="Perfil" component={PerfilScreen} />
-        <Stack.Screen name="NominaEmpleadoScreen" component={NominaEmpleadoScreen} />
-        <Stack.Screen name="NominaEmpleadoDetalleScreen" component={NominaEmpleadoDetalleScreen} />
-        <Stack.Screen name ="NominaDetalleScren" component={NominaDetalleScren} />
-        <Stack.Screen name="DashboardEmpleadoScreen" component={DashboardEmpleadoScreen} />
-        <Stack.Screen name="RegEmpleado" component={RegEmpleadoScreen} />
-        <Stack.Screen name="DetalleOffboardingScreen" component={DetalleOffboardingScreen} />
-        <Stack.Screen name="AddEmpleadoScreen" component={AddEmpleadoScreen} />
-        <Stack.Screen name="DetalleEmpleadoScreen" component={DetalleEmpleadoScreen} />
-        <Stack.Screen name="AsistenciaDetalleScreen" component={AsistenciaDetalleScreen} />
-        <Stack.Screen name="AsistenciaCalendarioScreen" component={AsistenciaCalendarioScreen} />
-        <Stack.Screen name="DetalleCandidatoScreen" component={DetalleCandidatoScreen} />
-        <Stack.Screen name="AsistenciaEmpleadoScreen" component={AsistenciaEmpleadoScreen} />
-        <Stack.Screen name="NotificacionesScreen" component={NotificacionesScreen} />
-        <Stack.Screen name="PerfilEmpleadoScreen" component={PerfilEmpleadoScreen} />
-        <Stack.Screen name="ContratoScreen" component={ContratoScreen} />
-        <Stack.Screen name="CertificadosScreen" component={CertificadosScreen} />
-      </Stack.Navigator>
-    </NavigationContainer>
+    <AuthProvider>
+      <NavigationContainer>
+        <RootNavigator />
+      </NavigationContainer>
+    </AuthProvider>
   );
 }
 

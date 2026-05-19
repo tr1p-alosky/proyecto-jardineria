@@ -6,12 +6,15 @@ import {
   Pressable,
   ScrollView,
   Dimensions,
+  Alert,
+  ActivityIndicator,
 } from 'react-native';
 import { useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../App';
+import { ApiService } from '../services/api.service';
 import LogoSGRH from '../assets/SGRH.svg';
 
 const { width, height } = Dimensions.get('window');
@@ -19,7 +22,57 @@ type Nav = NativeStackNavigationProp<RootStackParamList>;
 
 export default function RegEmpleadoScreen() {
   const navigation = useNavigation<Nav>();
+  const [loading, setLoading] = useState(false);
   const [accepted, setAccepted] = useState(false);
+
+  // Estados del formulario
+  const [nombre_completo, setNombre] = useState('');
+  const [email_corporativo, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [telefono, setTelefono] = useState('');
+  const [cargo, setCargo] = useState('');
+  const [departamento, setDepartamento] = useState('');
+  const [direccion, setDireccion] = useState('');
+  const [fecha_nacimiento, setFechaNacimiento] = useState('');
+
+  const handleRegister = async () => {
+    // Validar campos obligatorios
+    if (!nombre_completo.trim() || !email_corporativo.trim() || !password.trim() || !cargo.trim() || !departamento.trim()) {
+      Alert.alert('Error', 'Por favor completa todos los campos obligatorios (nombre, email, contraseña, cargo, departamento)');
+      return;
+    }
+
+    // Validar términos y condiciones
+    if (!accepted) {
+      Alert.alert('Error', 'Debes aceptar los términos de servicio y política de privacidad');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await ApiService.registerEmployee({
+        nombre_completo,
+        email_corporativo,
+        password,
+        ...(telefono && { telefono }),
+        cargo,
+        departamento,
+        ...(direccion && { direccion }),
+        ...(fecha_nacimiento && { fecha_nacimiento }),
+      });
+
+      Alert.alert('¡Éxito!', 'Te has registrado correctamente. Ahora puedes iniciar sesión.', [
+        {
+          text: 'OK',
+          onPress: () => navigation.navigate('IniciarSesionEmpleadosScreen'),
+        },
+      ]);
+    } catch (error: any) {
+      Alert.alert('Error en el registro', error.message || 'No pudimos completar tu registro. Intenta más tarde.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <ScrollView style={styles.scroll} contentContainerStyle={styles.container}>
@@ -37,40 +90,120 @@ export default function RegEmpleadoScreen() {
       </Text>
 
       <Text style={styles.subtitle}>
-        Comencemos su viaje profesional. Configure sus credenciales de acceso para conectarse con el sistema de lorem ipsum dolor.
+        Comencemos tu viaje profesional. Configura tus credenciales de acceso para conectarte con el sistema SGRH de BrightView.
       </Text>
 
       {/* Formulario */}
       <View style={styles.formCard}>
-        <Text style={styles.label}>Nombre completo</Text>
-        <TextInput style={styles.input} placeholder="Ej. Natanael Cano" placeholderTextColor="#aaa" />
+        <Text style={styles.label}>Nombre completo *</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Ej. Natanael Cano"
+          placeholderTextColor="#aaa"
+          editable={!loading}
+          value={nombre_completo}
+          onChangeText={setNombre}
+        />
 
-        <Text style={styles.label}>ID de empleado</Text>
-        <TextInput style={styles.input} placeholder="123456..." placeholderTextColor="#aaa" keyboardType="numeric" />
+        <Text style={styles.label}>Email corporativo *</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="tu@brightview.com"
+          placeholderTextColor="#aaa"
+          keyboardType="email-address"
+          autoCapitalize="none"
+          editable={!loading}
+          value={email_corporativo}
+          onChangeText={setEmail}
+        />
 
-        <Text style={styles.label}>Email</Text>
-        <TextInput style={styles.input} placeholder="lorem@ipsum.dolor" placeholderTextColor="#aaa" keyboardType="email-address" autoCapitalize="none" />
+        <Text style={styles.label}>Contraseña *</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Mínimo 8 caracteres"
+          placeholderTextColor="#aaa"
+          secureTextEntry
+          editable={!loading}
+          value={password}
+          onChangeText={setPassword}
+        />
 
-        <Text style={styles.label}>Ingresa tu contraseña</Text>
-        <TextInput style={styles.input} placeholder="12345" placeholderTextColor="#aaa" secureTextEntry />
+        <Text style={styles.label}>Cargo *</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Ej. Jardinero, Supervisor"
+          placeholderTextColor="#aaa"
+          editable={!loading}
+          value={cargo}
+          onChangeText={setCargo}
+        />
+
+        <Text style={styles.label}>Departamento *</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Ej. Mantenimiento, Administrativo"
+          placeholderTextColor="#aaa"
+          editable={!loading}
+          value={departamento}
+          onChangeText={setDepartamento}
+        />
+
+        <Text style={styles.label}>Teléfono</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="+1234567890"
+          placeholderTextColor="#aaa"
+          keyboardType="phone-pad"
+          editable={!loading}
+          value={telefono}
+          onChangeText={setTelefono}
+        />
+
+        <Text style={styles.label}>Dirección</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Tu dirección"
+          placeholderTextColor="#aaa"
+          editable={!loading}
+          value={direccion}
+          onChangeText={setDireccion}
+        />
+
+        <Text style={styles.label}>Fecha de nacimiento (YYYY-MM-DD)</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="1990-01-15"
+          placeholderTextColor="#aaa"
+          editable={!loading}
+          value={fecha_nacimiento}
+          onChangeText={setFechaNacimiento}
+        />
 
         {/* Checkbox términos */}
-        <Pressable style={styles.checkboxRow} onPress={() => setAccepted(!accepted)}>
+        <Pressable style={styles.checkboxRow} onPress={() => setAccepted(!accepted)} disabled={loading}>
           <View style={[styles.checkbox, accepted && styles.checkboxChecked]} />
           <Text style={styles.checkboxText}>
             Acepto los <Text style={styles.bold}>Términos de Servicio</Text> y la{' '}
-            <Text style={styles.bold}>Política de Privacidad</Text> de BrightView Landscapes para el uso de herramientas digitales en campo.
+            <Text style={styles.bold}>Política de Privacidad</Text> de BrightView Landscapes para el uso de herramientas digitales.
           </Text>
         </Pressable>
 
         {/* Botón registrar */}
-        <Pressable style={styles.registerButton}>
-          <Text style={styles.registerButtonText}>Registrarme</Text>
+        <Pressable
+          style={[styles.registerButton, loading && styles.registerButtonDisabled]}
+          onPress={handleRegister}
+          disabled={loading}
+        >
+          {loading ? (
+            <ActivityIndicator color="#FFFFFF" />
+          ) : (
+            <Text style={styles.registerButtonText}>Registrarme</Text>
+          )}
         </Pressable>
 
         {/* Login link */}
         <Text style={styles.loginText}>
-          Ya tienes una cuenta?{' '}
+          ¿Ya tienes una cuenta?{' '}
           <Text style={styles.loginLink} onPress={() => navigation.navigate('IniciarSesionEmpleadosScreen')}>
             Inicia sesión aquí
           </Text>
@@ -93,20 +226,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 8,
     marginBottom: 24,
-  },
-  asteriskBox: {
-    width: 48,
-    height: 48,
-    backgroundColor: '#BCF0AE',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 4,
-  },
-  logoText: {
-    fontSize: 18,
-    fontFamily: 'FunnelDisplay_700Bold',
-    color: '#BCF0AE',
-    lineHeight: 22,
   },
   title: {
     fontSize: 42,
@@ -178,6 +297,9 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     alignItems: 'center',
     marginTop: 20,
+  },
+  registerButtonDisabled: {
+    opacity: 0.6,
   },
   registerButtonText: {
     fontSize: 16,

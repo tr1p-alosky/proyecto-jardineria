@@ -5,21 +5,41 @@ import {
   TextInput,
   Pressable,
   Dimensions,
+  Alert,
+  ActivityIndicator,
 } from 'react-native';
 import { useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../App';
+import { useAuth } from '../contexts/AuthContext';
 import Asterisk from '../assets/SGRH.svg';
 
 const { width, height } = Dimensions.get('window');
 type Nav = NativeStackNavigationProp<RootStackParamList>;
 
-export default function IniciarSesionScreen() {
+export default function IniciarSesionEmpleadosScreen() {
   const navigation = useNavigation<Nav>();
-  
+  const { login, loading } = useAuth();
+
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [keepSession, setKeepSession] = useState(false);
+
+  const handleLogin = async () => {
+    if (!email.trim() || !password.trim()) {
+      Alert.alert('Error', 'Por favor completa email y contraseña');
+      return;
+    }
+
+    try {
+      await login(email, password);
+      // La navegación se maneja automáticamente en RootNavigator
+    } catch (error: any) {
+      Alert.alert('Error de autenticación', error.message || 'Credenciales inválidas');
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -29,52 +49,74 @@ export default function IniciarSesionScreen() {
         <View style={styles.logoRow}>
           <Asterisk width={220} height={220} />
         </View>
-        <Text style={styles.logoSubtitle}>Acceso corporativo</Text>
+        <Text style={styles.logoSubtitle}>Acceso empleados</Text>
       </View>
+
+      <Pressable
+        style={[
+          styles.loginButton,
+          { backgroundColor: '#BCF0AE', marginBottom: 20, width: width - 48 },
+        ]}
+        onPress={() => navigation.navigate('IniciarSesion')}
+      >
+        <Text style={[styles.loginButtonText, { color: '#111' }]}>
+          Iniciar sesión como administrador
+        </Text>
+      </Pressable>
 
       <View style={styles.formContainer}>
         <Text style={styles.label}>Email corporativo</Text>
         <TextInput
           style={styles.input}
-          placeholder="lorem@ipsum.dolor"
+          placeholder="usuario@brightview.com"
           placeholderTextColor="#aaa"
           keyboardType="email-address"
           autoCapitalize="none"
+          editable={!loading}
+          value={email}
+          onChangeText={setEmail}
         />
 
         <View style={styles.passwordRow}>
           <Text style={styles.label}>Contraseña</Text>
-          <Text style={styles.forgotText}>olvido su clave?</Text>
+          <Text style={styles.forgotText}>¿Olvidó su clave?</Text>
         </View>
         <TextInput
           style={styles.input}
-          placeholder="123456..."
+          placeholder="••••••••"
           placeholderTextColor="#aaa"
           secureTextEntry
+          editable={!loading}
+          value={password}
+          onChangeText={setPassword}
         />
 
-        <Pressable style={styles.checkboxRow} onPress={() => setKeepSession(!keepSession)}>
+        <Pressable
+          style={styles.checkboxRow}
+          onPress={() => setKeepSession(!keepSession)}
+          disabled={loading}
+        >
           <View style={[styles.checkbox, keepSession && styles.checkboxChecked]} />
           <Text style={styles.checkboxText}>Mantener sesión iniciada</Text>
         </Pressable>
       </View>
 
-      
-
       <View style={styles.bottomContainer}>
         <Pressable
-          style={styles.loginButton}
-          onPress={() => navigation.navigate('DashboardEmpleadoScreen')}
+          style={[styles.loginButton, loading && styles.loginButtonDisabled]}
+          onPress={handleLogin}
+          disabled={loading}
         >
-          <Text style={styles.loginButtonText}>Ingresar</Text>
+          {loading ? (
+            <ActivityIndicator color="#FFFFFF" />
+          ) : (
+            <Text style={styles.loginButtonText}>Ingresar</Text>
+          )}
         </Pressable>
 
         <Text style={styles.registerText}>
           No tienes una cuenta?{' '}
-          <Text
-            style={styles.registerLink}
-            onPress={() => navigation.navigate('RegEmpleado')}
-          >
+          <Text style={styles.registerLink} onPress={() => navigation.navigate('RegEmpleado')}>
             Regístrate aquí
           </Text>
         </Text>
@@ -161,33 +203,6 @@ const styles = StyleSheet.create({
     fontFamily: 'FunnelDisplay_400Regular',
     color: '#333',
   },
-  rolRow: {
-    flexDirection: 'row',
-    gap: 12,
-    marginTop: 20,
-    width: width - 48,
-  },
-  rolBtn: {
-    flex: 1,
-    paddingVertical: 12,
-    borderRadius: 30,
-    borderWidth: 1.5,
-    borderColor: '#ccc',
-    alignItems: 'center',
-  },
-  rolBtnActive: {
-    backgroundColor: '#BCF0AE',
-    borderColor: '#BCF0AE',
-  },
-  rolText: {
-    fontSize: 14,
-    fontFamily: 'FunnelDisplay_400Regular',
-    color: '#888',
-  },
-  rolTextActive: {
-    fontFamily: 'FunnelDisplay_700Bold',
-    color: '#111',
-  },
   bottomContainer: {
     position: 'absolute',
     bottom: height * 0.06,
@@ -196,24 +211,30 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   loginButton: {
-    backgroundColor: '#111',
+    backgroundColor: '#333',
+    paddingVertical: 14,
+    paddingHorizontal: 40,
     borderRadius: 30,
-    paddingVertical: 18,
     width: '100%',
     alignItems: 'center',
   },
+  loginButtonDisabled: {
+    opacity: 0.6,
+  },
   loginButtonText: {
-    fontSize: 18,
+    fontSize: 16,
     fontFamily: 'FunnelDisplay_700Bold',
     color: '#FFFFFF',
   },
   registerText: {
-    fontSize: 14,
+    fontSize: 13,
     fontFamily: 'FunnelDisplay_400Regular',
-    color: '#888',
+    color: '#666',
+    textAlign: 'center',
   },
   registerLink: {
+    color: '#BCF0AE',
     fontFamily: 'FunnelDisplay_700Bold',
-    color: '#333',
   },
 });
+  

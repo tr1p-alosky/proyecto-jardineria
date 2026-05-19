@@ -34,10 +34,10 @@ Authorization: Bearer {{auth_token}}
 Content-Type: application/json
 
 {
-  "id_empleado": "002-BV",
+  "id_empleado": "005-BV",
   "nombre_completo": "Maria Rodriguez",
-  "email_corporativo": "maria.rodriguez@brightview.com",
-  "password": "password123",
+  "email_corporativo": "alan@brightview.com",
+  "password": "Alan123",
   "role": "EMPLEADO",
   "telefono": "+1234567891",
   "cargo": "Jardinero",

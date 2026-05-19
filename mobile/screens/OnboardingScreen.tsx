@@ -6,25 +6,50 @@ import {
   Dimensions,
   Pressable,
   TextInput,
+  ActivityIndicator,
+  Alert,
 } from 'react-native';
+import { useState, useCallback } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../App';
 import Asterisk from '../assets/SGRH.svg';
 import BrightView from '../assets/brightview.svg';
+import { ApiService, EmpleadoResponse } from '../services/api.service';
 
 const { width, height } = Dimensions.get('window');
 type Nav = NativeStackNavigationProp<RootStackParamList>;
 
-const empleados = [
-  { nombre: 'Natanael Cano', departamento: 'Departamento', puesto: 'Puesto de trabajo', email: 'email@example.com', fecha: '05 enero, 2025' },
-  { nombre: 'Natanael Cano', departamento: 'Departamento', puesto: 'Puesto de trabajo', email: 'email@example.com', fecha: '05 enero, 2025' },
-  { nombre: 'Natanael Cano', departamento: 'Departamento', puesto: 'Puesto de trabajo', email: 'email@example.com', fecha: '05 enero, 2025' },
-];
-
 export default function OnboardingScreen() {
   const navigation = useNavigation<Nav>();
+  const [empleados, setEmpleados] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useFocusEffect(
+    useCallback(() => {
+      loadEmpleados();
+    }, [])
+  );
+
+  const loadEmpleados = async () => {
+    try {
+      setLoading(true);
+      const data = await ApiService.listEmployees();
+      const formatted = data.map((e) => ({
+        nombre: e.nombre_completo,
+        departamento: e.departamento || 'Sin departamento',
+        puesto: e.cargo || 'Sin cargo',
+        email: e.email_corporativo,
+        fecha: e.fecha_creacion ? new Date(e.fecha_creacion).toLocaleDateString() : 'Sin fecha',
+      }));
+      setEmpleados(formatted);
+    } catch (error: any) {
+      Alert.alert('Error', error.message || 'No se pudieron cargar los empleados');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <View style={{ flex: 1, backgroundColor: '#FFF' }}>
@@ -51,21 +76,25 @@ export default function OnboardingScreen() {
         </View>
 
         {/* Lista de empleados */}
-        {empleados.map((e, i) => (
-          <Pressable key={i} style={styles.card} onPress={() => navigation.navigate('DetalleEmpleadoScreen', { empleado: e })}>
-            <View style={styles.avatar} />
-            <View style={styles.cardInfo}>
-              <Text style={styles.cardName}>{e.nombre}</Text>
-              <Text style={styles.cardDetail}>{e.departamento}</Text>
-              <Text style={styles.cardDetail}>{e.puesto}</Text>
-              <Text style={styles.cardDetail}>{e.email}</Text>
-              <View style={styles.cardFooter}>
-                <Text style={styles.cardFechaLabel}>Fecha de contratación</Text>
-                <Text style={styles.cardFecha}>{e.fecha}</Text>
+        {loading ? (
+          <ActivityIndicator size="large" color="#BCF0AE" style={{ marginTop: 20 }} />
+        ) : (
+          empleados.map((e, i) => (
+            <Pressable key={i} style={styles.card} onPress={() => navigation.navigate('DetalleEmpleadoScreen', { empleado: e })}>
+              <View style={styles.avatar} />
+              <View style={styles.cardInfo}>
+                <Text style={styles.cardName}>{e.nombre}</Text>
+                <Text style={styles.cardDetail}>{e.departamento}</Text>
+                <Text style={styles.cardDetail}>{e.puesto}</Text>
+                <Text style={styles.cardDetail}>{e.email}</Text>
+                <View style={styles.cardFooter}>
+                  <Text style={styles.cardFechaLabel}>Fecha de contratación</Text>
+                  <Text style={styles.cardFecha}>{e.fecha}</Text>
+                </View>
               </View>
-            </View>
-          </Pressable>
-        ))}
+            </Pressable>
+          ))
+        )}
 
         {/* Espaciado para el botón flotante */}
         <View style={{ height: 80 }} />

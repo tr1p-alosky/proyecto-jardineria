@@ -45,11 +45,11 @@ model Personal {
   email_corporativo  String          @unique
   password           String          // ¡Añadido para el Login!
   role               Role            @default(EMPLEADO)
-  telefono           String
+  telefono           String?         // Opcional
   cargo              String
   departamento       String
-  direccion          String?         // Sin acento por seguridad
-  fecha_nacimiento   DateTime
+  direccion          String?         // Opcional
+  fecha_nacimiento   DateTime?       // Opcional
   estado_laboral     Estado_laboral? @default(activo)
   dias_disponibles   Int             @default(14)
 

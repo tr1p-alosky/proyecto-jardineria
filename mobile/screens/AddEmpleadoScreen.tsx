@@ -6,19 +6,67 @@ import {
     Dimensions,
     Pressable, 
     TextInput,
+    Alert,
+    ActivityIndicator,
 } from 'react-native';
+import { useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../App';
+import { ApiService } from '../services/api.service';
 import Asterisk from '../assets/SGRH.svg';
 import BrightView from '../assets/brightview.svg';
 
 const { width, height } = Dimensions.get('window');
 type Nav = NativeStackNavigationProp<RootStackParamList>;
 
-export default function AñadirEmpleadoScreen() {
+export default function AddEmpleadoScreen() {
   const navigation = useNavigation<Nav>();
+  const [loading, setLoading] = useState(false);
+
+  // Estados del formulario
+  const [nombre_completo, setNombre] = useState('');
+  const [email_corporativo, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [telefono, setTelefono] = useState('');
+  const [cargo, setCargo] = useState('');
+  const [departamento, setDepartamento] = useState('');
+  const [direccion, setDireccion] = useState('');
+  const [fecha_nacimiento, setFechaNacimiento] = useState('');
+
+  const handleAddEmployee = async () => {
+    // Validar campos obligatorios
+    if (!nombre_completo.trim() || !email_corporativo.trim() || !password.trim() || !cargo.trim() || !departamento.trim()) {
+      Alert.alert('Error', 'Por favor completa todos los campos obligatorios (nombre, email, contraseña, cargo, departamento)');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await ApiService.createEmployee({
+        nombre_completo,
+        email_corporativo,
+        password,
+        ...(telefono && { telefono }),
+        cargo,
+        departamento,
+        ...(direccion && { direccion }),
+        ...(fecha_nacimiento && { fecha_nacimiento }),
+      });
+
+      Alert.alert('¡Éxito!', 'Empleado agregado correctamente.', [
+        {
+          text: 'OK',
+          onPress: () => navigation.goBack(),
+        },
+      ]);
+    } catch (error: any) {
+      Alert.alert('Error', error.message || 'No pudimos agregar el empleado. Intenta más tarde.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <ScrollView style={styles.scroll} contentContainerStyle={styles.container}>
@@ -40,52 +88,100 @@ export default function AñadirEmpleadoScreen() {
 
       {/* Formulario */}
       <View style={styles.formCard}>
-        <Text style={styles.label}>Nombre completo</Text>
+        <Text style={styles.label}>Nombre completo *</Text>
         <TextInput
           style={styles.input}
           placeholder="Ej. Natanael Cano"
           placeholderTextColor="#aaa"
+          editable={!loading}
+          value={nombre_completo}
+          onChangeText={setNombre}
         />
 
-        <Text style={styles.label}>ID de empleado</Text>
+        <Text style={styles.label}>Email corporativo *</Text>
         <TextInput
           style={styles.input}
-          placeholder="123456..."
-          placeholderTextColor="#aaa"
-          keyboardType="numeric"
-        />
-
-        <Text style={styles.label}>Email</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="lorem@ipsum.dolor"
+          placeholder="empleado@brightview.com"
           placeholderTextColor="#aaa"
           keyboardType="email-address"
           autoCapitalize="none"
+          editable={!loading}
+          value={email_corporativo}
+          onChangeText={setEmail}
         />
 
-        <Text style={styles.label}>Fecha de nacimiento</Text>
+        <Text style={styles.label}>Contraseña *</Text>
         <TextInput
           style={styles.input}
-          placeholder="12345"
+          placeholder="Contraseña temporal"
           placeholderTextColor="#aaa"
-          keyboardType="numeric"
+          secureTextEntry
+          editable={!loading}
+          value={password}
+          onChangeText={setPassword}
         />
 
-        <Text style={styles.label}>Departamento</Text>
+        <Text style={styles.label}>Cargo *</Text>
         <TextInput
           style={styles.input}
+          placeholder="Ej. Jardinero, Supervisor"
           placeholderTextColor="#aaa"
+          editable={!loading}
+          value={cargo}
+          onChangeText={setCargo}
         />
 
-        <Text style={styles.label}>Puesto</Text>
+        <Text style={styles.label}>Departamento *</Text>
         <TextInput
           style={styles.input}
+          placeholder="Ej. Mantenimiento, Administrativo"
           placeholderTextColor="#aaa"
+          editable={!loading}
+          value={departamento}
+          onChangeText={setDepartamento}
         />
 
-        <Pressable style={styles.addButton} onPress={() => navigation.navigate('Onboarding')}>
-          <Text style={styles.addButtonText}>Anadir</Text>
+        <Text style={styles.label}>Teléfono</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="+1234567890"
+          placeholderTextColor="#aaa"
+          keyboardType="phone-pad"
+          editable={!loading}
+          value={telefono}
+          onChangeText={setTelefono}
+        />
+
+        <Text style={styles.label}>Dirección</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Dirección del empleado"
+          placeholderTextColor="#aaa"
+          editable={!loading}
+          value={direccion}
+          onChangeText={setDireccion}
+        />
+
+        <Text style={styles.label}>Fecha de nacimiento (YYYY-MM-DD)</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="1990-01-15"
+          placeholderTextColor="#aaa"
+          editable={!loading}
+          value={fecha_nacimiento}
+          onChangeText={setFechaNacimiento}
+        />
+
+        <Pressable
+          style={[styles.addButton, loading && styles.addButtonDisabled]}
+          onPress={handleAddEmployee}
+          disabled={loading}
+        >
+          {loading ? (
+            <ActivityIndicator color="#FFF" />
+          ) : (
+            <Text style={styles.addButtonText}>Agregar empleado</Text>
+          )}
         </Pressable>
       </View>
     </ScrollView>
@@ -151,9 +247,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 20,
   },
+  addButtonDisabled: {
+    opacity: 0.6,
+  },
   addButtonText: {
     fontSize: 16,
     fontFamily: 'FunnelDisplay_700Bold',
     color: '#FFF',
   },
 });
+

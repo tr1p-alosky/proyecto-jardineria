@@ -3,8 +3,8 @@ import { Role, Estado_laboral } from '@prisma/client';
 
 export class CreatePersonalDto {
   @IsString()
-  @IsNotEmpty()
-  id_empleado!: string; // 
+  @IsOptional()
+  id_empleado?: string; // Opcional: si no se proporciona, se genera automáticamente
 
   @IsString()
   @IsNotEmpty()
@@ -24,8 +24,8 @@ export class CreatePersonalDto {
   role?: Role;
 
   @IsString()
-  @IsNotEmpty()
-  telefono!: string;
+  @IsOptional()
+  telefono?: string;
 
   @IsString()
   @IsNotEmpty()
@@ -40,8 +40,8 @@ export class CreatePersonalDto {
   direccion?: string;
 
   @IsDateString({}, { message: 'Debe ser una fecha valida (YYYY-MM-DD)' })
-  @IsNotEmpty()
-  fecha_nacimiento!: string;
+  @IsOptional()
+  fecha_nacimiento?: string;
 
   @IsEnum(Estado_laboral)
   @IsOptional()
